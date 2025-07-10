@@ -1,53 +1,64 @@
 <template>
-  <div class="Clasificacion">
-    <h2>Escanée equipo</h2>
-    <form @submit.prevent="escanear">
-      <input type="text" v-model="mac" placeholder="MAC address" required />
-      <button type="submit">Escanear</button>
-    </form>
-    <p v-if="error" style="color: red;">{{ error }}</p>
-    <p v-if="mensaje" style="color: green;">{{ mensaje }}</p>
-  </div>
+  <v-container class="pa-4" style="max-width: 500px;">
+    <v-card elevation="8">
+      <v-card-title class="text-h6">Escanear equipo</v-card-title>
+
+      <v-card-text>
+        <v-form @submit.prevent="escanear">
+          <v-text-field
+            v-model="mac"
+            label="MAC Address"
+            prepend-icon="mdi-qrcode-scan"
+            required
+          ></v-text-field>
+
+          <v-btn type="submit" color="primary" block>
+            Escanear
+          </v-btn>
+        </v-form>
+
+        <v-alert
+          v-if="error"
+          type="error"
+          class="mt-4"
+          dense
+          border="start"
+        >
+          {{ error }}
+        </v-alert>
+
+        <v-alert
+          v-if="mensaje"
+          type="success"
+          class="mt-4"
+          dense
+          border="start"
+        >
+          {{ mensaje }}
+        </v-alert>
+      </v-card-text>
+    </v-card>
+  </v-container>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      mac: '',
-      error: '',
-      mensaje: '',
-    };
-  },
-  methods: {
-    async escanear() {
-      this.error = '';
-      this.mensaje = '';
+<script setup>
+import { ref } from 'vue'
 
-      try {
-        const response = await fetch(
-          `http://localhost:8000/api/clasificacion/registrar-entrada?mac=${encodeURIComponent(this.mac)}`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`, // si usas Sanctum con token
-            },
-          }
-        );
+const mac = ref('')
+const error = ref('')
+const mensaje = ref('')
 
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.message || 'Error en la clasificación');
-        }
+const escanear = () => {
+  error.value = ''
+  mensaje.value = ''
 
-        const data = await response.json();
-        this.mensaje = data.message || 'Equipo registrado correctamente';
-        this.mac = '';
-      } catch (err) {
-        this.error = err.message;
-      }
-    },
-  },
-};
+  if (mac.value.trim() === '') {
+    error.value = 'La dirección MAC es obligatoria.'
+    return
+  }
+
+  // Simulación de escaneo
+  mensaje.value = `Equipo con MAC ${mac.value} escaneado correctamente`
+  mac.value = ''
+}
 </script>
