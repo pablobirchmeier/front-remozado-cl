@@ -42,17 +42,60 @@ const login = async () => {
       email: email.value,
       password: password.value,
     })
+
     userStore.setAuthData({
       user: response.data.user,
     })
-    // ✅ Puedes reemplazar esto por Pinia si ya estás usando userStore
+
+    // Guardar token
     localStorage.setItem('token', response.data.access_token)
 
-    // Redirección a la ruta protegida
-    router.push('/clasificacion')
+    // Redirección según estación_actual_id
+    const estacionId = response.data.user.estacion_actual_id
+
+    switch (estacionId) {
+      case 1:
+        router.push('/logistica')
+        break
+      case 2:
+        router.push('/clasificacion')
+        break
+      case 3:
+        router.push('/remozado')
+        break
+      case 4:
+        router.push('/lavado')
+        break
+      case 5:
+        router.push('/armeydesarme')
+        break
+      case 6:
+        router.push('/reparacion')
+        break
+      case 7:
+        router.push('/testeo')
+        break
+      case 8:
+        router.push('/microscopio')
+        break
+      case 9:
+        router.push('/kitting')
+        break
+      case 10:
+        router.push('/qc')
+        break
+      case 11:
+        router.push('/scrap')
+        break
+      default:
+        router.push('/') // Ruta por defecto si no tiene estación
+        break
+    }
+
   } catch (err) {
     error.value = err.response?.data?.message || 'Error al iniciar sesión'
   }
+
 }
 </script>
 

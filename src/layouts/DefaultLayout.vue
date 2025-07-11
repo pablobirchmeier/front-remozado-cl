@@ -1,24 +1,26 @@
-<!-- layouts/DefaultLayout.vue -->
 <template>
   <v-app>
+    <!-- Sidebar -->
     <v-navigation-drawer v-model="drawer" :width="250" temporary>
-      <!-- Drawer -->
       <v-card flat>
-        <v-card-title class="text-subtitle-1 font-weight-bold">Menú</v-card-title>
+        <v-card-title class="text-subtitle-1 font-weight-bold">
+          Amerinode Chile
+        </v-card-title>
         <v-divider />
         <v-treeview
           :items="items"
           item-value="id"
-          activatable
           open-on-click
           class="mt-2"
+          @item-click="handleTreeviewSelect"
         />
       </v-card>
     </v-navigation-drawer>
 
+    <!-- AppBar -->
     <v-app-bar elevation="7">
       <template #prepend>
-        <v-app-bar-nav-icon @click="drawer = !drawer" />
+        <v-app-bar-nav-icon v-if="esAdmin" @click="drawer = !drawer" />
       </template>
 
       <v-app-bar-title class="flex-grow-1 text-truncate">
@@ -34,6 +36,7 @@
       <LogoutButton class="me-4" />
     </v-app-bar>
 
+    <!-- Main Content -->
     <v-main>
       <router-view />
     </v-main>
@@ -41,13 +44,20 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import axios from 'axios'
 import LogoutButton from '../components/LogoutButton.vue'
 import { useUserStore } from '../stores/user'
 
 const drawer = ref(false)
 const userStore = useUserStore()
+const router = useRouter()
+const route = useRoute()
+
 const userName = computed(() => userStore.user?.nombre ?? 'Usuario')
+const esAdmin = computed(() => userStore.user?.role_id === 1)
+const activeItem = ref([])
 
 const items = ref([
   {
@@ -79,4 +89,55 @@ const items = ref([
     ],
   },
 ])
+
+function rutaDesdeEstacion(id) {
+  const mapa = {
+    10: 'logistica',
+    11: 'clasificacion',
+    12: 'lavado',
+    13: 'remozado',
+    14: 'armeydesarme',
+    15: 'reparacion',
+    16: 'testeo',
+    17: 'microscopio',
+    18: 'kitting',
+    19: 'qc',
+    20: 'scrap',
+  }
+  return mapa[id] || null
+}
+
+function handleTreeviewSelect(selectedIds) {
+  const selectedId = selectedIds[0] // solo uno activo a la vez
+  if (!selectedId) return
+
+  const ruta = rutaDesdeEstacion(selectedId)
+  if (ruta) {
+    router.push({ path: `/${ruta}` })
+    drawer.value = false
+  }
+}
+
+onMounted(async () => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    try {
+      const response = await axios.get('/api/user')
+      const user = response.data
+      userStore.setAuthData({ user })
+
+      // Redirección automática solo para operarios
+      if (user.role_id === 3) {
+        const destino = `/${rutaDesdeEstacion(user.estacion_actual_id)}`
+        if (route.path !== destino) {
+          router.replace(destino)
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar el usuario:', error)
+      localStorage.removeItem('token')
+      router.push('/login')
+    }
+  }
+})
 </script>
