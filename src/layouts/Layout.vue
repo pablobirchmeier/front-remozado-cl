@@ -1,23 +1,38 @@
 <template>
   <v-app>
-    <!-- Sidebar -->
     <v-navigation-drawer v-model="drawer" :width="250" temporary>
       <v-card flat>
         <v-card-title class="text-subtitle-1 font-weight-bold">
           Amerinode Chile
         </v-card-title>
         <v-divider />
-        <v-treeview
-          :items="items"
-          item-value="id"
-          open-on-click
-          class="mt-2"
-          @item-click="handleTreeviewSelect"
-        />
+        <v-list dense nav class="text-h5"> <!-- 👈 Cambia el tamaño base -->
+          <template v-for="group in items" :key="group.id">
+            <v-list-group :value="group.id">
+              <template #activator="{ props }">
+                <v-list-item v-bind="props">
+                  <template #title>
+                    <span class="text-h7">{{ group.title }}</span>
+                  </template>
+                </v-list-item>
+              </template>
+
+              <v-list-item
+                v-for="child in group.children"
+                :key="child.id"
+                @click="handleTreeviewSelect([child.id])"
+              >
+                <template #title>
+                  <span class="text-body-1">{{ child.title }}</span>
+                </template>
+              </v-list-item>
+            </v-list-group>
+          </template>
+
+        </v-list>
       </v-card>
     </v-navigation-drawer>
 
-    <!-- AppBar -->
     <v-app-bar elevation="7">
       <template #prepend>
         <v-app-bar-nav-icon v-if="esAdmin" @click="drawer = !drawer" />
@@ -36,7 +51,6 @@
       <LogoutButton class="me-4" />
     </v-app-bar>
 
-    <!-- Main Content -->
     <v-main>
       <router-view />
     </v-main>
@@ -57,7 +71,6 @@ const route = useRoute()
 
 const userName = computed(() => userStore.user?.nombre ?? 'Usuario')
 const esAdmin = computed(() => userStore.user?.role_id === 1)
-const activeItem = ref([])
 
 const items = ref([
   {
@@ -92,6 +105,11 @@ const items = ref([
 
 function rutaDesdeEstacion(id) {
   const mapa = {
+    2: 'usuarios',
+    3: 'informes',
+    4: 'productividad',
+    5: 'estaciones-trabajo',
+    6: 'equipos',
     10: 'logistica',
     11: 'clasificacion',
     12: 'lavado',
@@ -108,7 +126,7 @@ function rutaDesdeEstacion(id) {
 }
 
 function handleTreeviewSelect(selectedIds) {
-  const selectedId = selectedIds[0] // solo uno activo a la vez
+  const selectedId = selectedIds[0]
   if (!selectedId) return
 
   const ruta = rutaDesdeEstacion(selectedId)
@@ -126,7 +144,6 @@ onMounted(async () => {
       const user = response.data
       userStore.setAuthData({ user })
 
-      // Redirección automática solo para operarios
       if (user.role_id === 3) {
         const destino = `/${rutaDesdeEstacion(user.estacion_actual_id)}`
         if (route.path !== destino) {

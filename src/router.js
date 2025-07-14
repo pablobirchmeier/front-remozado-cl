@@ -11,9 +11,15 @@ import Microscopio from './views/estaciones/Microscopio.vue'
 import Kitting from './views/estaciones/Kitting.vue'
 import QC from './views/estaciones/QC.vue'
 import Scrap from './views/estaciones/Scrap.vue'
+import Usuarios from './views/administracion/Usuarios.vue'
+import Informes from './views/administracion/Informes.vue'
+import Estaciones from './views/administracion/EstacionDeTrabajo.vue'
+import Equipos from './views/administracion/Equipos.vue'
+import Productividad from './views/administracion/Productividad.vue'
 
 // Pinia store
 import { useUserStore } from './stores/user'
+import EstacionDeTrabajo from './views/administracion/EstacionDeTrabajo.vue'
 
 const routes = [
   {
@@ -76,6 +82,36 @@ const routes = [
     component: Scrap,
     meta: { requiresAuth: true, estacionId: 11 },
   },
+    {
+    path: '/usuarios',
+    component: Usuarios,
+    meta: { requiresAuth: true, estacionId: 12 },
+  },
+    {
+    path: '/informes',
+    component: Informes,
+    meta: { requiresAuth: true, estacionId: 13 },
+  },
+    {
+    path: '/productividad',
+    component: Productividad,
+    meta: { requiresAuth: true, estacionId: 14 },
+  },
+  {
+    path: '/estaciones-trabajo',
+    component: Estaciones,
+    meta: { requiresAuth: true, estacionId: 15 },
+  },
+  { 
+    path: '/equipos',
+    component: Equipos,
+    meta: { requiresAuth: true, estacionId: 16 },
+  },
+  { 
+    path: '/dashboard',
+    component: Usuarios,
+    meta: { requiresAuth: true, estacionId: 17 },
+  },
   {
     path: '/:pathMatch(.*)*',
     redirect: '/login',
@@ -87,7 +123,7 @@ const router = createRouter({
   routes,
 })
 
-// 👮 Global guardia de navegación
+// 👮 Global guardia de navegación  
 //import { useUserStore } from './stores/user' // Ajusta si tu path es diferente
 //import { rutaDesdeEstacion } from './utils/estaciones' // Debes tener esta función definida
 

@@ -23,7 +23,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from '../lib/axios' // ✅ Asegúrate que esta instancia está bien configurada
+import axios from '../lib/axios'
 import { useUserStore } from '../stores/user'
 
 // Variables reactivas
