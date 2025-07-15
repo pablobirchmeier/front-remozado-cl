@@ -30,93 +30,162 @@ const routes = [
   {
     path: '/clasificacion',
     component: Clasificacion,
-    meta: { requiresAuth: true, estacionId: 2 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 2,
+      title: 'Clasificación',
+    },
   },
   {
     path: '/logistica',
     component: Logistica,
-    meta: { requiresAuth: true, estacionId: 1 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 1,
+      title: 'Logística / Recepción',
+    },
   },
   {
     path: '/remozado',
     component: Remozado,
-    meta: { requiresAuth: true, estacionId: 3 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 3,
+      title: 'Remozado de equipos',
+    },
   },
   {
     path: '/lavado',
     component: Lavado,
-    meta: { requiresAuth: true, estacionId: 4 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 4,
+      title: 'Lavado de equipos',
+    },
   },
   {
     path: '/armeydesarme',
     component: ArmeYDesarme,
-    meta: { requiresAuth: true, estacionId: 5 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 5,
+      title: 'Arme y Desarme',
+    },
   },
   {
     path: '/reparacion',
     component: Reparacion,
-    meta: { requiresAuth: true, estacionId: 6 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 6,
+      title: 'Reparación electrónica',
+    },
   },
   {
     path: '/testeo',
     component: Testeo,
-    meta: { requiresAuth: true, estacionId: 7 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 7,
+      title: 'Testeo',
+    },
   },
   {
     path: '/microscopio',
     component: Microscopio,
-    meta: { requiresAuth: true, estacionId: 8 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 8,
+      title: 'Microscopio',
+    },
   },
   {
     path: '/kitting',
     component: Kitting,
-    meta: { requiresAuth: true, estacionId: 9 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 9,
+      title: 'Kitting',
+    },
   },
   {
     path: '/qc',
     component: QC,
-    meta: { requiresAuth: true, estacionId: 10 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 10,
+      title: 'Control Calidad (QC)',
+    },
   },
   {
     path: '/scrap',
     component: Scrap,
-    meta: { requiresAuth: true, estacionId: 11 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 11,
+      title: 'SCRAP',
+    },
   },
-    {
+  {
     path: '/usuarios',
     component: Usuarios,
-    meta: { requiresAuth: true, estacionId: 12 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 12,
+      title: 'Usuarios',
+    },
   },
-    {
+  {
     path: '/informes',
     component: Informes,
-    meta: { requiresAuth: true, estacionId: 13 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 13,
+      title: 'Informes',
+    },
   },
-    {
+  {
     path: '/productividad',
     component: Productividad,
-    meta: { requiresAuth: true, estacionId: 14 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 14,
+      title: 'Productividad',
+    },
   },
   {
     path: '/estaciones-trabajo',
     component: Estaciones,
-    meta: { requiresAuth: true, estacionId: 15 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 15,
+      title: 'Estaciones de trabajo',
+    },
   },
-  { 
+  {
     path: '/equipos',
     component: Equipos,
-    meta: { requiresAuth: true, estacionId: 16 },
+    meta: {
+      requiresAuth: true,
+      estacionId: 16,
+      title: 'Equipos',
+    },
   },
-  { 
+  {
     path: '/dashboard',
-    component: Usuarios,
-    meta: { requiresAuth: true, estacionId: 17 },
+    component: Usuarios, // Puedes cambiar el componente si no corresponde
+    meta: {
+      requiresAuth: true,
+      estacionId: 17,
+      title: 'Dashboard',
+    },
   },
   {
     path: '/:pathMatch(.*)*',
     redirect: '/login',
   },
 ]
+
 
 const router = createRouter({
   history: createWebHistory(),

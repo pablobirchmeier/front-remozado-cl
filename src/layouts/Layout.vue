@@ -6,13 +6,13 @@
           Amerinode Chile
         </v-card-title>
         <v-divider />
-        <v-list dense nav class="text-h5"> <!-- 👈 Cambia el tamaño base -->
+        <v-list dense nav class="text-h5">
           <template v-for="group in items" :key="group.id">
             <v-list-group :value="group.id">
               <template #activator="{ props }">
                 <v-list-item v-bind="props">
                   <template #title>
-                    <span class="text-h7">{{ group.title }}</span>
+                    <span class="text-h6">{{ group.title }}</span>
                   </template>
                 </v-list-item>
               </template>
@@ -38,9 +38,14 @@
         <v-app-bar-nav-icon v-if="esAdmin" @click="drawer = !drawer" />
       </template>
 
-      <v-app-bar-title class="flex-grow-1 text-truncate">
-        Remozado Chile
-      </v-app-bar-title>
+    <v-app-bar-title
+      class="flex-grow-1"
+      style="overflow: visible !important; text-overflow: unset !important; white-space: normal !important; flex: 1 1 auto;"
+    >
+      {{ tituloRutaActual }}
+    </v-app-bar-title>
+
+
 
       <v-spacer />
 
@@ -71,6 +76,8 @@ const route = useRoute()
 
 const userName = computed(() => userStore.user?.nombre ?? 'Usuario')
 const esAdmin = computed(() => userStore.user?.role_id === 1)
+const tituloRutaActual = computed(() => route.meta.title ?? 'Remozado Chile')
+
 
 const items = ref([
   {
@@ -86,7 +93,7 @@ const items = ref([
   },
   {
     id: 30,
-    title: 'Estaciones de trabajo',
+    title: 'Estaciones',
     children: [
       { id: 10, title: 'Logística / Recepción' },
       { id: 11, title: 'Clasificación' },
