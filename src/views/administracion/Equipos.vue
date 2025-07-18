@@ -7,7 +7,6 @@
       class="elevation-1"
       items-per-page="50"
     >
-      <!-- Búsqueda -->
       <template #top>
         <v-text-field
           v-model="busqueda"
@@ -18,7 +17,6 @@
         />
       </template>
 
-      <!-- Estado visual con chip -->
       <template #item.estado="{ item }">
         <v-chip
           :color="item.estado === 'VIGENTE' ? 'green' : 'grey'"
@@ -30,7 +28,6 @@
         </v-chip>
       </template>
 
-      <!-- CRIT. COM -->
       <template #item.criterio_comercial="{ item }">
         <v-chip
           :color="item.criterio_comercial === 1 ? 'red' : 'grey'"
@@ -42,7 +39,6 @@
         </v-chip>
       </template>
 
-      <!-- Acciones -->
       <template #item.acciones="{ item }">
         <div class="d-flex" style="gap: 8px;">
           <v-btn icon density="compact" size="32" color="green" @click="verEquipo(item)">
@@ -61,7 +57,7 @@
       </template>
     </v-data-table>
 
-    <!-- Modal de vista (detalle del equipo) -->
+    <!-- Dialog con slot para columna personalizada -->
     <v-dialog v-model="dialogVer" max-width="800px">
       <v-card>
         <v-card-title class="text-h6">
@@ -74,7 +70,14 @@
             class="elevation-1"
             dense
             hide-default-footer
-          />
+          >
+            <!-- Slot para hacer más ancha la columna de fecha -->
+            <template #item.created_at="{ item }">
+              <td style="min-width: 220px;">
+                {{ item.created_at }}
+              </td>
+            </template>
+          </v-data-table>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
@@ -102,13 +105,16 @@ const headers = [
   { title: 'Acciones', key: 'acciones', sortable: false },
 ]
 
-// Estado del modal y datos de detalle
 const dialogVer = ref(false)
-const detalleEquipo = ref([]) // Aquí irán los datos del backend
+const detalleEquipo = ref([])
+
 const detalleHeaders = [
-  { title: 'Campo A', key: 'campoA' },
-  { title: 'Campo B', key: 'campoB' },
-  { title: 'Campo C', key: 'campoC' },
+  { title: 'Usuario', key: 'usuario_nombre' },
+  { title: 'Fecha y hora', key: 'created_at' },
+  { title: 'Entrada/salida', key: 'tipo' },
+  { title: 'Estación', key: 'estacion' },
+  { title: 'Resultado', key: 'resultado' },
+  { title: 'Observaciones', key: 'observaciones' },
 ]
 
 onMounted(async () => {
@@ -120,20 +126,15 @@ onMounted(async () => {
   }
 })
 
-function verEquipo(equipo) {
+async function verEquipo(equipo) {
   dialogVer.value = true
-  detalleEquipo.value = [] // Limpia tabla
-
-  // ⚠️ Luego reemplazas esto con tu lógica real de fetch al backend
-  // Simulación por ahora
-  detalleEquipo.value = [
-    { campoA: 'Valor A1', campoB: 'Valor B1', campoC: 'Valor C1' },
-    { campoA: 'Valor A2', campoB: 'Valor B2', campoC: 'Valor C2' },
-  ]
-
-  // Más adelante puedes hacer:
-  // const response = await axios.get(`/api/equipos/${equipo.id}/detalle`)
-  // detalleEquipo.value = response.data
+  detalleEquipo.value = []
+  try {
+    const response = await axios.get(`/api/equipos/${equipo.id}`)
+    detalleEquipo.value = response.data
+  } catch (error) {
+    console.error('Error al obtener detalle del equipo:', error)
+  }
 }
 
 function buscarDetalle(equipo) {

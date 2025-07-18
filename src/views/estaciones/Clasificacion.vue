@@ -1,7 +1,6 @@
 <template>
   <v-stepper v-model="pasoActual" :items="['Identificación', 'Clasificación']">
-    
-    <!-- Paso 1 -->
+
     <template v-slot:item.1>
       <v-container class="pa-4" style="max-width: 500px;">
         <v-card elevation="8">
@@ -45,18 +44,31 @@
       </v-container>
     </template>
 
-    <!-- Paso 2 -->
     <template v-slot:item.2>
       <v-card flat>
         <v-row>
           <v-col cols="8" md="8">
-            <div class="text-subtitle-1 font-weight-medium mb-2">
-              Este equipo ya ha sido:
-            </div>
-            <div class="text-body-1">Lavado: 1 vez, última vez 30-06-2025</div>
-            <div class="text-body-1">Reparado: 1 vez, última vez 30-06-2025</div>
-            <div class="text-body-1">Remozado: 1 vez, última vez 28-06-2025</div>
-            <div class="text-body-1">Cambio de tapa: 0 veces</div>
+
+            <template v-if="equipoResultados && equipoResultados.length > 0">
+              <div class="text-subtitle-1 font-weight-medium mb-2">
+                Este equipo ya ha sido:
+              </div>
+              <div v-for="resultado in equipoResultados" :key="resultado.tipo_resultado" class="text-body-1">
+                Este equipo se ha {{ formatoAccion(resultado.tipo_resultado) }}:
+                <span v-if="resultado.cantidad > 0">
+                  {{ resultado.cantidad }} {{ resultado.cantidad === 1 ? 'vez' : 'veces' }},
+                  última vez {{ formatoFecha(resultado.ultima_fecha_hora) }}
+                </span>
+                <span v-else>
+                  0 veces
+                </span>
+              </div>
+            </template>
+            <template v-else>
+              <div class="text-body-1">
+                No hay registros de acciones para este equipo.
+              </div>
+            </template>
           </v-col>
 
           <v-col cols="4" md="4" class="d-flex flex-column align-end justify-center ga-2">
@@ -80,7 +92,6 @@
       </v-card>
     </template>
 
-    <!-- Sin acciones -->
     <template v-slot:actions>
 
     </template>
@@ -96,10 +107,12 @@ const mac = ref('')
 const error = ref('')
 const mensaje = ref('')
 const equipoId = ref(null)
+const equipoResultados = ref([]) // Nueva variable reactiva para los resultados de clasificación
 
 const escanear = async () => {
   error.value = ''
   mensaje.value = ''
+  equipoResultados.value = [] // Limpiar resultados anteriores
 
   if (mac.value.trim() === '') {
     error.value = 'La dirección MAC es obligatoria.'
@@ -113,8 +126,14 @@ const escanear = async () => {
 
     mensaje.value = response.data.message || 'Equipo registrado correctamente'
     equipoId.value = response.data.mov?.equipo_id
-
-    // Avanza automáticamente al paso 2
+    
+    // Asignar los resultados de la API a la variable reactiva
+    if (response.data.resultados) {
+      equipoResultados.value = response.data.resultados
+    } else {
+      equipoResultados.value = []
+    }
+    
     pasoActual.value = 2
 
   } catch (err) {
@@ -131,11 +150,10 @@ const seleccionarTipo = async (valor) => {
     })
 
     mensaje.value = response.data.mensaje || 'Resultado registrado correctamente'
-
-    // Vuelve automáticamente al paso 1
     pasoActual.value = 1
     equipoId.value = null
     mac.value = ''
+    equipoResultados.value = [] // Limpiar resultados al volver al paso 1
 
     setTimeout(() => {
       mensaje.value = ''
@@ -145,4 +163,26 @@ const seleccionarTipo = async (valor) => {
     error.value = error.response?.data?.message || 'Error al registrar el resultado'
   }
 }
+
+const formatoFecha = (fechaHora) => {
+  if (!fechaHora) return 'N/A';
+  const fecha = new Date(fechaHora);
+  const opciones = { day: '2-digit', month: '2-digit', year: 'numeric' };
+  return fecha.toLocaleDateString('es-ES', opciones);
+};
+
+const formatoAccion = (tipo) => {
+  switch (tipo) {
+    case 'Remozado':
+      return 'remozado';
+    case 'Lavado':
+      return 'lavado';
+    case 'Reparacion':
+      return 'reparado';
+    case 'Arme y desarme':
+      return 'cambiado la tapa';
+    default:
+      return tipo.toLowerCase();
+  }
+};
 </script>
