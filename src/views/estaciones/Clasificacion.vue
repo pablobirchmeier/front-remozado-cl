@@ -107,12 +107,12 @@ const mac = ref('')
 const error = ref('')
 const mensaje = ref('')
 const equipoId = ref(null)
-const equipoResultados = ref([]) // Nueva variable reactiva para los resultados de clasificación
+const equipoResultados = ref([])
 
 const escanear = async () => {
   error.value = ''
   mensaje.value = ''
-  equipoResultados.value = [] // Limpiar resultados anteriores
+  equipoResultados.value = [] 
 
   if (mac.value.trim() === '') {
     error.value = 'La dirección MAC es obligatoria.'
