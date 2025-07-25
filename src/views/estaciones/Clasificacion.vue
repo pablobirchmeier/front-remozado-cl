@@ -137,7 +137,7 @@ const escanear = async () => {
     pasoActual.value = 2
 
   } catch (err) {
-    error.value = err.response?.data?.message || 'Error en la clasificación'
+    error.value = err.response?.data?.error || 'Error en la clasificación'
   }
 }
 

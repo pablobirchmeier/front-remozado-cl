@@ -463,7 +463,7 @@ const showSnackbar = (message, color = "success") => {
 const verificarMacAddress = async () => {
   const mac = macAddress.value.trim();
   try {
-    const response = await axios.get("/api/clasificacion/registrar-entrada", {
+    const response = await axios.get("/api/reparacion/registrar-entrada", {
       params: { mac: mac },
     });
     const data = response.data;

@@ -27,12 +27,16 @@
           {{ item.caducado === 1 ? 'SI' : 'NO' }}
         </v-chip>
       </template>
-            <template #item.toolbox="{ item }">
+
+      <template #item.toolbox="{ item }">
         <v-chip
           :color="item.toolbox === 1 ? 'red' : 'grey'"
           text-color="white"
           small
           label
+          :ripple="item.toolbox === 1"
+          class="cursor-pointer"
+          @click="item.toolbox === 1 && verObservacionToolbox(item)"
         >
           {{ item.toolbox === 1 ? 'SI' : 'NO' }}
         </v-chip>
@@ -87,6 +91,24 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialogToolbox" max-width="600px">
+      <v-card>
+        <v-card-title class="text-h6">Observaciones Toolbox</v-card-title>
+        <v-card-text>
+          <v-textarea
+            label="Observaciones"
+            v-model="observacionToolbox"
+            readonly
+            auto-grow
+          />
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn text @click="dialogToolbox = false">Cerrar</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -96,6 +118,8 @@ import axios from '@/lib/axios'
 
 const equipos = ref([])
 const busqueda = ref('')
+const dialogToolbox = ref(false)
+const observacionToolbox = ref('')
 
 const headers = [
   { title: 'N° CATALOGO(SAP)', key: 'catalogo_sap' },
@@ -135,6 +159,22 @@ async function verEquipo(equipo) {
     detalleEquipo.value = response.data
   } catch (error) {
     console.error('Error al obtener detalle del equipo:', error)
+  }
+}
+
+async function verObservacionToolbox(equipo) {
+  try {
+    const response = await axios.get('/api/equipos/detalle-toolbox', {
+      params: {
+        serie: equipo.mac
+      }
+    });
+    observacionToolbox.value = response.data.observacion || 'Sin observaciones'
+    dialogToolbox.value = true
+  } catch (error) {
+    console.error('Error al obtener observación de toolbox:', error)
+    observacionToolbox.value = 'Error al obtener la observación'
+    dialogToolbox.value = true
   }
 }
 

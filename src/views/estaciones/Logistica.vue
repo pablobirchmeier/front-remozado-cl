@@ -8,31 +8,59 @@
     <div v-if="tab === 'importar'">
       <p class="text-subtitle-1 mb-8">Importe archivo según corresponda</p>
 
-    <div class="d-flex justify-center" style="gap: 50px;">
-      <v-btn color="blue" class="white--text px-6 d-flex align-center justify-center" height="50" @click="triggerInput('now')">
-        <span>ENTREGA NOW</span>
-        <v-icon end class="ml-2">mdi-upload</v-icon>
-      </v-btn>
+      <!-- Fila 1 -->
+      <v-row justify="center" align="center" class="mb-4">
+        <v-col cols="12" md="4" class="d-flex justify-center">
+          <v-btn
+            class="btn-xl"
+            color="blue"
+            dark
+            @click="triggerInput('now')"
+          >
+            ENTREGA NOW
+            <v-icon end class="ml-2">mdi-upload</v-icon>
+          </v-btn>
+        </v-col>
+        <v-col cols="12" md="4" class="d-flex justify-center">
+          <v-btn
+            class="btn-xl"
+            color="blue"
+            dark
+            @click="triggerInput('cdl')"
+          >
+            ENTREGA CDL
+            <v-icon end class="ml-2">mdi-upload</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
 
-      <v-btn color="blue" class="white--text px-6 d-flex align-center justify-center" height="50" @click="triggerInput('cdl')">
-        <span>ENTREGA CDL</span>
-        <v-icon end class="ml-2">mdi-upload</v-icon>
-      </v-btn>
-    </div>
+      <!-- Fila 2 -->
+      <v-row justify="center" align="center">
+        <v-col cols="12" md="4" class="d-flex justify-center">
+          <v-btn
+            class="btn-xl"
+            color="blue"
+            dark
+            @click="triggerInput('caducados')"
+          >
+            ARCHIVO CADUCADOS
+            <v-icon end class="ml-2">mdi-upload</v-icon>
+          </v-btn>
+        </v-col>
+        <v-col cols="12" md="4" class="d-flex justify-center">
+          <v-btn
+            class="btn-xl"
+            color="blue"
+            dark
+            @click="triggerInput('toolbox')"
+          >
+            ARCHIVO TOOLBOX
+            <v-icon end class="ml-2">mdi-upload</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
 
-    <div class="d-flex justify-center mt-5" style="gap: 50px;">
-      <v-btn color="blue" class="white--text px-6 d-flex align-center justify-center" height="50" @click="triggerInput('caducados')">
-        <span>ARCHIVO CADUCADOS</span>
-        <v-icon end class="ml-2">mdi-upload</v-icon>
-      </v-btn>
-    </div>
-    <div class="d-flex justify-center mt-5" style="gap: 50px;">
-      <v-btn color="blue" class="white--text px-6 d-flex align-center justify-center" height="50" @click="triggerInput('toolbox')">
-        <span>ARCHIVO TOOLBOX</span>
-        <v-icon end class="ml-2">mdi-upload</v-icon>
-      </v-btn>
-    </div>
-
+      <!-- Inputs -->
       <input ref="inputNow" type="file" accept=".xls,.xlsx" class="d-none" @change="handleFileUpload($event, 'now')" />
       <input ref="inputCdl" type="file" accept=".xls,.xlsx,.csv" class="d-none" @change="handleFileUpload($event, 'cdl')" />
       <input ref="inputCaducados" type="file" accept=".csv" class="d-none" @change="handleFileUpload($event, 'caducados')" />
@@ -44,6 +72,7 @@
     </v-overlay>
   </v-container>
 </template>
+
 
 <script setup>
 import { ref } from 'vue'
@@ -97,5 +126,11 @@ const handleFileUpload = async (event, tipo) => {
 }
 .d-none {
   display: none;
+}
+
+.btn-xl {
+  min-width: 260px;
+  height: 50px;
+  font-size: 16px;
 }
 </style>
