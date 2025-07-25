@@ -338,11 +338,22 @@
     <v-footer class="d-flex justify-end text-caption pa-0 bg-transparent">
       © 2025 Amerinode.
     </v-footer>
+
+    <v-snackbar
+      v-model="snackbar"
+      :timeout="3000"
+      color="success"
+      rounded="pill"
+      elevation="5"
+    >
+      {{ snackbarMensaje }}
+    </v-snackbar>
   </v-stepper>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import axios from "@/lib/axios";
 
 // Estado del stepper
 const currentStep = ref(1);
@@ -355,6 +366,8 @@ const macAddress = ref("");
 const repairTypeExito = ref(0);
 const repairTypeFracaso = ref(0);
 const observations = ref("");
+const snackbarMensaje = ref("");
+const snackbar = ref(false);
 
 const stepperItems = [
   "Identificación",
@@ -422,6 +435,39 @@ const onNoEnciende = () => {
   repairTypeFracaso.value = 2;
   nextStep();
 };
+
+const verificarMacAddress = async () => {
+  const mac = macAddress.value.trim();
+  if (!mac) {
+    snackbarMensaje.value = "Por favor, ingrese una serie MAC válida.";
+    snackbar.value = true;
+    return false;
+  }
+  try {
+    const response = await axios.get(
+      `/api/reparacion/registrar-entrada/${mac}`
+    );
+    const data = response.data;
+    console.log("Verificando MAC:", data);
+
+    if (!data.valido) {
+      snackbarMensaje.value = "La serie MAC no es válida.";
+      snackbar.value = true;
+      return false;
+    }
+  } catch (error) {
+    console.log("Error al verificar MAC:", error);
+
+    snackbarMensaje.value = "Error al verificar la serie MAC.";
+    snackbar.value = true;
+  }
+};
+
+watch(macAddress, (newValue) => {
+  if (newValue && newValue.trim() !== "") {
+    verificarMacAddress();
+  }
+});
 
 const submit = () => {
   console.log({
