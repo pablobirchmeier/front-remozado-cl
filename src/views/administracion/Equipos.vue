@@ -17,25 +17,24 @@
         />
       </template>
 
-      <template #item.estado="{ item }">
+      <template #item.caducado="{ item }">
         <v-chip
-          :color="item.estado === 'VIGENTE' ? 'green' : 'grey'"
+          :color="item.caducado === 1 ? 'red' : 'grey'"
           text-color="white"
           small
           label
         >
-          {{ item.estado }}
+          {{ item.caducado === 1 ? 'SI' : 'NO' }}
         </v-chip>
       </template>
-
-      <template #item.criterio_comercial="{ item }">
+            <template #item.toolbox="{ item }">
         <v-chip
-          :color="item.criterio_comercial === 1 ? 'red' : 'grey'"
+          :color="item.toolbox === 1 ? 'red' : 'grey'"
           text-color="white"
           small
           label
         >
-          {{ item.criterio_comercial === 1 ? 'SI' : 'NO' }}
+          {{ item.toolbox === 1 ? 'SI' : 'NO' }}
         </v-chip>
       </template>
 
@@ -44,6 +43,7 @@
           <v-btn icon density="compact" size="32" color="green" @click="verEquipo(item)">
             <v-icon size="16">mdi-eye</v-icon>
           </v-btn>
+          <!-- comentados por ahora
           <v-btn icon density="compact" size="32" color="cyan" @click="buscarDetalle(item)">
             <v-icon size="16">mdi-magnify</v-icon>
           </v-btn>
@@ -53,6 +53,8 @@
           <v-btn icon density="compact" size="32" color="red" @click="eliminarEquipo(item)">
             <v-icon size="16">mdi-delete</v-icon>
           </v-btn>
+          -->
+
         </div>
       </template>
     </v-data-table>
@@ -96,12 +98,11 @@ const equipos = ref([])
 const busqueda = ref('')
 
 const headers = [
-  { title: 'N° CATALOGO(SAP)', key: 'serie' },
-  { title: 'MAC ADDRESS', key: 'mac' },
-  { title: 'MODELO', key: 'modelo_id' },
-  { title: 'TECNOLOGÍA', key: 'tecnologia' },
-  { title: 'ESTADO', key: 'estado' },
-  { title: 'CRIT. COM', key: 'criterio_comercial' },
+  { title: 'N° CATALOGO(SAP)', key: 'catalogo_sap' },
+  { title: 'MAC/SERIE', key: 'mac' },
+  { title: 'MODELO', key: 'modelo' },
+  { title: 'CADUCADO', key: 'caducado' },
+  { title: 'TOOLBOX', key: 'toolbox' },
   { title: 'Acciones', key: 'acciones', sortable: false },
 ]
 

@@ -26,11 +26,17 @@
         <v-icon end class="ml-2">mdi-upload</v-icon>
       </v-btn>
     </div>
-
+    <div class="d-flex justify-center mt-5" style="gap: 50px;">
+      <v-btn color="blue" class="white--text px-6 d-flex align-center justify-center" height="50" @click="triggerInput('toolbox')">
+        <span>ARCHIVO TOOLBOX</span>
+        <v-icon end class="ml-2">mdi-upload</v-icon>
+      </v-btn>
+    </div>
 
       <input ref="inputNow" type="file" accept=".xls,.xlsx" class="d-none" @change="handleFileUpload($event, 'now')" />
       <input ref="inputCdl" type="file" accept=".xls,.xlsx,.csv" class="d-none" @change="handleFileUpload($event, 'cdl')" />
-      <input ref="inputCaducados" type="file" accept=".xls,.xlsx,.csv" class="d-none" @change="handleFileUpload($event, 'caducados')" />
+      <input ref="inputCaducados" type="file" accept=".csv" class="d-none" @change="handleFileUpload($event, 'caducados')" />
+      <input ref="inputToolbox" type="file" accept=".csv" class="d-none" @change="handleFileUpload($event, 'toolbox')" />
     </div>
 
     <v-overlay :model-value="loading" persistent class="d-flex align-center justify-center">
@@ -47,12 +53,14 @@ const tab = ref('importar')
 const inputNow = ref(null)
 const inputCdl = ref(null)
 const inputCaducados = ref(null)
+const inputToolbox = ref(null)
 const loading = ref(false)
 
 const triggerInput = (tipo) => {
   if (tipo === 'now') inputNow.value.click()
   if (tipo === 'cdl') inputCdl.value.click()
   if (tipo === 'caducados') inputCaducados.value.click()
+  if (tipo === 'toolbox') inputToolbox.value.click()
 }
 
 const handleFileUpload = async (event, tipo) => {
@@ -68,7 +76,7 @@ const handleFileUpload = async (event, tipo) => {
     if (tipo === 'now') url = '/api/logistica/importar-now'
     else if (tipo === 'cdl') url = '/api/logistica/importar-cdl'
     else if (tipo === 'caducados') url = '/api/logistica/importar-caducados'
-
+    else if (tipo === 'toolbox') url = '/api/logistica/importar-toolbox'
     const response = await axios.post(url, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
