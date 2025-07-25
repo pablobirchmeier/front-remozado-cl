@@ -444,9 +444,12 @@ const verificarMacAddress = async () => {
     return false;
   }
   try {
-    const response = await axios.get(
+    /*const response = await axios.get(
       `/api/reparacion/registrar-entrada/${mac}`
-    );
+    );*/
+    const response = await axios.get('/api/clasificacion/registrar-entrada', {
+      params: { mac: mac }
+    })
     const data = response.data;
     console.log("Verificando MAC:", data);
 
