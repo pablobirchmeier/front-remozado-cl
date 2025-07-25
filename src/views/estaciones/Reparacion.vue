@@ -41,7 +41,7 @@
               @click="nextStep"
               variant="tonal"
               :append-icon="'$next'"
-              :disabled="!macAddress.trim()"
+              :disabled="!macCorect"
               >Siguiente</v-btn
             >
           </v-card-actions>
@@ -324,7 +324,7 @@
           <v-card-actions class="justify-end pa-1 mt-1">
             <v-btn
               color="success"
-              @click="submit"
+              @click="registrarResultado"
               size="small"
               variant="tonal"
               :append-icon="'$complete'"
@@ -341,12 +341,27 @@
 
     <v-snackbar
       v-model="snackbar"
-      :timeout="3000"
-      color="success"
-      rounded="pill"
-      elevation="5"
+      :timeout="5000"
+      :color="snackbarColor"
+      location="bottom start"
+      variant="tonal"
+      rounded="lg"
+      elevation="24"
     >
-      {{ snackbarMensaje }}
+      <div class="d-flex align-center">
+        <v-icon
+          :icon="
+            snackbarColor === 'success'
+              ? 'mdi-check-circle'
+              : 'mdi-alert-circle'
+          "
+          class="mr-3"
+        />
+        <span>{{ snackbarMensaje }}</span>
+      </div>
+      <template v-slot:actions>
+        <v-btn variant="text" @click="snackbar = false"> Cerrar </v-btn>
+      </template>
     </v-snackbar>
   </v-stepper>
 </template>
@@ -366,8 +381,11 @@ const macAddress = ref("");
 const repairTypeExito = ref(0);
 const repairTypeFracaso = ref(0);
 const observations = ref("");
-const snackbarMensaje = ref("");
+
 const snackbar = ref(false);
+const snackbarMensaje = ref("");
+const snackbarColor = ref("success");
+const macCorect = ref(false);
 
 const stepperItems = [
   "Identificación",
@@ -408,78 +426,89 @@ const onFailure = () => {
 };
 
 const onRJ45 = () => {
-  repairTypeExito.value = 0;
-  nextStep();
-};
-const onLED = () => {
   repairTypeExito.value = 1;
   nextStep();
 };
-const onPCarga = () => {
+const onLED = () => {
   repairTypeExito.value = 2;
   nextStep();
 };
-const onBotones = () => {
+const onPCarga = () => {
   repairTypeExito.value = 3;
   nextStep();
 };
-const onNoInicia = () => {
-  repairTypeFracaso.value = 0;
+const onBotones = () => {
+  repairTypeExito.value = 4;
   nextStep();
 };
-const onSulfato = () => {
+const onNoInicia = () => {
   repairTypeFracaso.value = 1;
   nextStep();
 };
-const onNoEnciende = () => {
+const onSulfato = () => {
   repairTypeFracaso.value = 2;
   nextStep();
+};
+const onNoEnciende = () => {
+  repairTypeFracaso.value = 3;
+  nextStep();
+};
+
+const showSnackbar = (message, color = "success") => {
+  snackbarMensaje.value = message;
+  snackbarColor.value = color;
+  snackbar.value = true;
 };
 
 const verificarMacAddress = async () => {
   const mac = macAddress.value.trim();
-  if (!mac) {
-    snackbarMensaje.value = "Por favor, ingrese una serie MAC válida.";
-    snackbar.value = true;
-    return false;
-  }
   try {
-    /*const response = await axios.get(
-      `/api/reparacion/registrar-entrada/${mac}`
-    );*/
-    const response = await axios.get('/api/clasificacion/registrar-entrada', {
-      params: { mac: mac }
-    })
+    const response = await axios.get("/api/clasificacion/registrar-entrada", {
+      params: { mac: mac },
+    });
     const data = response.data;
-    console.log("Verificando MAC:", data);
-
-    if (!data.valido) {
-      snackbarMensaje.value = "La serie MAC no es válida.";
-      snackbar.value = true;
-      return false;
+    showSnackbar("Serie MAC verificada correctamente.", "success");
+    macCorect.value = true;
+  } catch (err) {
+    console.log("Error al verificar MAC:", err);
+    const errorMessage =
+      err.response?.data?.error || "Error al verificar la MAC.";
+    if (err.response?.status === 404) {
+      showSnackbar(errorMessage, "error");
     }
-  } catch (error) {
-    console.log("Error al verificar MAC:", error);
-
-    snackbarMensaje.value = "Error al verificar la serie MAC.";
-    snackbar.value = true;
   }
 };
 
 watch(macAddress, (newValue) => {
-  if (newValue && newValue.trim() !== "") {
+  if (newValue && newValue.trim().length === 12) {
     verificarMacAddress();
   }
 });
 
-const submit = () => {
-  console.log({
-    macAddress: macAddress.value,
-    canRepair: canRepair.value,
-    repairType: repairType.value,
-    observations: observations.value,
-  });
-  emit("submit");
+const registrarResultado = async () => {
+  const payload = {
+    mac: macAddress.value,
+    exito: canRepair.value,
+    observaciones: observations.value,
+  };
+
+  if (reparacionExitosa.value) {
+    payload.tipo_reparacion = repairTypeExito.value;
+  } else {
+    payload.tipo_dano = repairTypeFracaso.value;
+  }
+
+  try {
+    const response = await axios.post(
+      "/api/reparacion/registrar-resultado",
+      payload
+    );
+    showSnackbar("Reparación registrada correctamente.", "success");
+    emit("submit");
+  } catch (error) {
+    console.error("Error al registrar resultado:", error);
+    showSnackbar("Error al registrar la reparación.", "error");
+  }
 };
 </script>
 
