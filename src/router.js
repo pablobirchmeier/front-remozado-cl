@@ -51,7 +51,7 @@ const routes = [
     meta: {
       requiresAuth: true,
       estacionId: 3,
-      title: 'Remozado de equipos',
+      title: 'Remozado',
     },
   },
   {
@@ -60,7 +60,7 @@ const routes = [
     meta: {
       requiresAuth: true,
       estacionId: 4,
-      title: 'Lavado de equipos',
+      title: 'Lavado',
     },
   },
   {
