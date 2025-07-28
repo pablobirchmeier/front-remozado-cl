@@ -50,7 +50,7 @@
 
       <!-- Paso 2: Resultado de la Reparación -->
       <v-stepper-window-item :value="2">
-        <v-card flat class="pa-2">
+        <v-card flat class="1">
           <v-card-title class="text-subtitle-1 font-weight-bold pa-1">
             Registro de Reparación
           </v-card-title>
@@ -70,21 +70,31 @@
                 hide-details
               ></v-text-field>
               <v-alert
-                v-if="hasPreviousRepair"
-                type="info"
+                v-if="equipoInfo"
+                type="success"
+                variant="tonal"
+                density="compact"
+                icon="mdi-information-outline"
+                class="mt-2 pa-1"
+              >
+                <span class="text-caption">{{ equipoInfo }}</span>
+              </v-alert>
+              <v-alert
+                v-if="previousRepairInfo"
+                :type="previousObservations ? 'info' : 'warning'"
                 variant="tonal"
                 density="compact"
                 icon="mdi-history"
                 class="mt-2 pa-1"
               >
-                <span class="text-caption"
-                  >Equipo reparado 1 vez (28-06-2025).</span
-                >
+                <span class="text-caption">{{ previousRepairInfo }}</span>
               </v-alert>
-              <div v-if="hasPreviousObservations" class="observations-box mt-2">
+              <div v-if="previousObservations" class="observations-box mt-2">
                 <p class="text-caption font-weight-medium">
                   Obs. anteriores:
-                  <span class="font-weight-regular">Se cambiaron botones.</span>
+                  <span class="font-weight-regular">{{
+                    previousObservations
+                  }}</span>
                 </p>
               </div>
             </v-col>
@@ -146,21 +156,31 @@
                 hide-details
               ></v-text-field>
               <v-alert
-                v-if="hasPreviousRepair"
-                type="info"
+                v-if="equipoInfo"
+                type="success"
+                variant="tonal"
+                density="compact"
+                icon="mdi-information-outline"
+                class="mt-2 pa-1"
+              >
+                <span class="text-caption">{{ equipoInfo }}</span>
+              </v-alert>
+              <v-alert
+                v-if="previousRepairInfo"
+                :type="previousObservations ? 'info' : 'warning'"
                 variant="tonal"
                 density="compact"
                 icon="mdi-history"
                 class="mt-2 pa-1"
               >
-                <span class="text-caption"
-                  >Equipo reparado 1 vez (28-06-2025).</span
-                >
+                <span class="text-caption">{{ previousRepairInfo }}</span>
               </v-alert>
-              <div v-if="hasPreviousObservations" class="observations-box mt-2">
+              <div v-if="previousObservations" class="observations-box mt-2">
                 <p class="text-caption font-weight-medium">
                   Obs. anteriores:
-                  <span class="font-weight-regular">Se cambiaron botones.</span>
+                  <span class="font-weight-regular">{{
+                    previousObservations
+                  }}</span>
                 </p>
               </div>
             </v-col>
@@ -373,8 +393,9 @@ import axios from "@/lib/axios";
 // Estado del stepper
 const currentStep = ref(1);
 const maxStepReached = ref(1);
-const hasPreviousRepair = ref(true);
-const hasPreviousObservations = ref(true);
+const equipoInfo = ref("");
+const previousRepairInfo = ref("");
+const previousObservations = ref("");
 const reparacionExitosa = ref(false);
 const canRepair = ref(0);
 const macAddress = ref("");
@@ -410,8 +431,6 @@ const goToStep = (step) => {
     currentStep.value = step;
   }
 };
-
-const emit = defineEmits(["submit"]);
 
 const onSuccess = () => {
   reparacionExitosa.value = true;
@@ -466,7 +485,30 @@ const verificarMacAddress = async () => {
     const response = await axios.get("/api/reparacion/registrar-entrada", {
       params: { mac: mac },
     });
+
     const data = response.data;
+
+    if (data.equipo) {
+      equipoInfo.value = `Material: ${data.equipo.material} - Modelo: ${data.equipo.modelo}`;
+    } else {
+      equipoInfo.value = "";
+    }
+
+    if (data.resultado && data.resultado !== "[]") {
+      const resultado = JSON.parse(data.resultado);
+      const fecha = new Date(resultado.fecha_hora).toLocaleDateString("es-CL");
+      const tipo = resultado.exito
+        ? resultado.tipo_reparacion
+        : resultado.tipo_dano;
+      previousRepairInfo.value = `Última reparación: ${fecha} - ${
+        resultado.exito ? "Exitosa" : "Fallida"
+      } (${tipo})`;
+      previousObservations.value = resultado.observaciones;
+    } else {
+      previousRepairInfo.value = "No se encontraron reparaciones anteriores.";
+      previousObservations.value = "";
+    }
+
     showSnackbar("Serie MAC verificada correctamente.", "success");
     macCorect.value = true;
   } catch (err) {
@@ -476,6 +518,9 @@ const verificarMacAddress = async () => {
     if (err.response?.status === 404) {
       showSnackbar(errorMessage, "error");
     }
+    equipoInfo.value = "";
+    previousRepairInfo.value = "";
+    previousObservations.value = "";
   }
 };
 
@@ -484,6 +529,21 @@ watch(macAddress, (newValue) => {
     verificarMacAddress();
   }
 });
+
+const resetState = () => {
+  currentStep.value = 1;
+  maxStepReached.value = 1;
+  equipoInfo.value = "";
+  previousRepairInfo.value = "";
+  previousObservations.value = "";
+  reparacionExitosa.value = false;
+  canRepair.value = 0;
+  macAddress.value = "";
+  repairTypeExito.value = 0;
+  repairTypeFracaso.value = 0;
+  observations.value = "";
+  macCorect.value = false;
+};
 
 const registrarResultado = async () => {
   const payload = {
@@ -503,11 +563,15 @@ const registrarResultado = async () => {
       "/api/reparacion/registrar-resultado",
       payload
     );
-    showSnackbar("Reparación registrada correctamente.", "success");
-    emit("submit");
+    console.log("Resultado registrado:", response.data);
+    showSnackbar(response.data.message, "success");
+    resetState();
   } catch (error) {
     console.error("Error al registrar resultado:", error);
-    showSnackbar("Error al registrar la reparación.", "error");
+    showSnackbar(
+      error.response?.data?.error || "Error al registrar resultado.",
+      "error"
+    );
   }
 };
 </script>
