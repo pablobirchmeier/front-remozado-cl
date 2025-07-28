@@ -48,7 +48,7 @@
         </v-card>
       </v-stepper-window-item>
 
-      <!-- Paso 2: Resultado de la Reparación -->
+      <!-- Paso 2: Resultado  -->
       <v-stepper-window-item :value="2">
         <v-card flat class="1">
           <v-card-title class="text-subtitle-1 font-weight-bold pa-1">
