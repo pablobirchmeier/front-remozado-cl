@@ -97,8 +97,8 @@ const items = ref([
     children: [
       { id: 10, title: 'Logística / Recepción' },
       { id: 11, title: 'Clasificación' },
-      { id: 12, title: 'Lavado de equipos' },
-      { id: 13, title: 'Remozado de equipos' },
+      { id: 12, title: 'Lavado'},
+      { id: 13, title: 'Remozado' },
       { id: 14, title: 'Arme y desarme' },
       { id: 15, title: 'Reparación electrónica' },
       { id: 16, title: 'Testeo' },

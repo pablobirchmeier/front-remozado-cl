@@ -1,11 +1,9 @@
 <template>
   <v-stepper v-model="pasoActual" :items="['Identificación', 'Clasificación']">
-
     <template v-slot:item.1>
       <v-container class="pa-4" style="max-width: 500px;">
         <v-card elevation="8">
           <v-card-title class="text-h6">Escanear equipo</v-card-title>
-
           <v-card-text>
             <v-form @submit.prevent="escanear">
               <v-text-field
