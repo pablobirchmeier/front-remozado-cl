@@ -100,13 +100,12 @@
             </v-col>
             <v-col
               cols="6"
-              md="12"
               class="d-flex flex-column justify-center align-center"
             >
               <h3 class="text-subtitle-2 font-weight-medium mb-4 text-center">
                 ¿Cuál fue el resultado?
               </h3>
-              <div class="d-flex flex-column ga-8">
+              <div class="d-flex flex-column ga-4">
                 <v-btn
                   color="success"
                   size="small"
@@ -335,9 +334,8 @@
                 label="Observaciones"
                 variant="solo-filled"
                 density="compact"
-                rows="2"
+                rows="3"
                 hide-details
-                no-resize
               />
             </v-col>
           </v-row>
@@ -402,6 +400,7 @@ const macAddress = ref("");
 const repairTypeExito = ref(0);
 const repairTypeFracaso = ref(0);
 const observations = ref("");
+const error = ref("");
 
 const snackbar = ref(false);
 const snackbarMensaje = ref("");
@@ -480,6 +479,8 @@ const showSnackbar = (message, color = "success") => {
 };
 
 const verificarMacAddress = async () => {
+  error.value = "";
+  equipoInfo.value = "";
   const mac = macAddress.value.trim();
   try {
     const response = await axios.get("/api/reparacion/registrar-entrada", {
@@ -487,6 +488,7 @@ const verificarMacAddress = async () => {
     });
 
     const data = response.data;
+    console.log("MAC verificada:", data);
 
     if (data.equipo) {
       equipoInfo.value = `Material: ${data.equipo.material} - Modelo: ${data.equipo.modelo}`;
@@ -495,8 +497,28 @@ const verificarMacAddress = async () => {
     }
 
     if (data.resultado && data.resultado !== "[]") {
-      const resultado = JSON.parse(data.resultado);
-      const fecha = new Date(resultado.fecha_hora).toLocaleDateString("es-CL");
+      let resultado;
+
+      // Verificar si resultado es un string JSON o ya es un objeto
+      if (typeof data.resultado === "string") {
+        try {
+          resultado = JSON.parse(data.resultado);
+        } catch (parseError) {
+          console.warn("Error al parsear resultado como JSON:", parseError);
+          // Si no se puede parsear, asumir que no hay resultados anteriores
+          previousRepairInfo.value =
+            "No se encontraron reparaciones anteriores.";
+          previousObservations.value = "";
+          showSnackbar("Serie MAC verificada correctamente.", "success");
+          macCorect.value = true;
+          return;
+        }
+      } else {
+        // Si ya es un objeto, usarlo directamente
+        resultado = data.resultado;
+      }
+
+      const fecha = new Date(resultado.created_at).toLocaleDateString("es-CL");
       const tipo = resultado.exito
         ? resultado.tipo_reparacion
         : resultado.tipo_dano;
@@ -513,11 +535,10 @@ const verificarMacAddress = async () => {
     macCorect.value = true;
   } catch (err) {
     console.log("Error al verificar MAC:", err);
-    const errorMessage =
-      err.response?.data?.error || "Error al verificar la MAC.";
-    if (err.response?.status === 404) {
-      showSnackbar(errorMessage, "error");
-    }
+    showSnackbar(
+      err.response?.data?.error || "Error al verificar la MAC.",
+      "error"
+    );
     equipoInfo.value = "";
     previousRepairInfo.value = "";
     previousObservations.value = "";
@@ -623,5 +644,245 @@ const registrarResultado = async () => {
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   padding: 4px 8px;
+}
+
+// Estilos responsivos para móvil vertical
+@media screen and (max-width: 768px) and (orientation: portrait) {
+  .v-stepper {
+    padding: 0.25rem;
+    border-radius: 8px;
+  }
+
+  .v-stepper-window {
+    margin: 0.25rem 0.5rem;
+  }
+
+  // Mejorar el header del stepper en móvil vertical
+  :deep(.v-stepper-header) {
+    padding: 0.5rem 0.25rem;
+
+    .v-stepper-item {
+      min-width: auto;
+
+      .v-stepper-item__title {
+        font-size: 0.75rem;
+        line-height: 1.2;
+      }
+
+      .v-stepper-item__subtitle {
+        font-size: 0.65rem;
+      }
+    }
+  }
+
+  // Ajustes para el contenido de los pasos
+  .v-card-text {
+    padding: 0.75rem !important;
+  }
+
+  .v-card-title {
+    font-size: 1rem !important;
+    padding: 0.5rem !important;
+  }
+
+  // Mejorar las columnas en móvil vertical
+  .v-row.dense {
+    margin: -4px;
+
+    .v-col {
+      padding: 4px;
+
+      // Solo en móvil vertical, cambiar las columnas a full width
+      &[cols="6"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+    }
+  }
+
+  // Contenedor específico para botones móviles - solo en vertical
+  .v-stepper-window-item:nth-child(2) {
+    .v-col:last-child {
+      .d-flex.flex-column.ga-4 {
+        gap: 0.75rem !important;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+      }
+    }
+  }
+
+  // Paso 2 y 3: Reorganizar layout para móvil vertical
+  .v-stepper-window-item:nth-child(2),
+  .v-stepper-window-item:nth-child(3) {
+    .v-row {
+      .v-col:first-child {
+        margin-bottom: 1rem;
+      }
+
+      .v-col:last-child {
+        .d-flex.flex-column {
+          gap: 0.75rem;
+          align-items: center;
+        }
+      }
+    }
+  }
+
+  // Ajustar botones para móvil vertical
+  .v-btn {
+    font-size: 0.8rem;
+    min-height: 40px;
+    padding: 0.5rem 1rem;
+
+    &.v-btn--block {
+      margin-bottom: 0.5rem;
+      max-width: 100%;
+    }
+  }
+
+  // Mejorar el grid de botones en paso 3
+  .v-stepper-window-item:nth-child(3) {
+    .v-row.dense {
+      max-width: 320px;
+      margin: 0 auto;
+
+      .v-col {
+        &[cols="12"] {
+          .v-btn {
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            min-height: 44px;
+          }
+        }
+      }
+    }
+  }
+
+  // Ajustar alertas y texto
+  .v-alert {
+    margin-top: 0.5rem !important;
+    padding: 0.5rem !important;
+
+    .text-caption {
+      font-size: 0.7rem;
+      line-height: 1.3;
+    }
+  }
+
+  .observations-box {
+    margin-top: 0.5rem;
+    padding: 6px 8px;
+
+    .text-caption {
+      font-size: 0.7rem;
+      line-height: 1.3;
+    }
+  }
+
+  // Mejorar campos de texto
+  .v-text-field,
+  .v-textarea {
+    .v-field__input {
+      font-size: 0.85rem;
+    }
+
+    .v-field__label {
+      font-size: 0.8rem;
+    }
+  }
+
+  // Ajustar subtítulos
+  .text-subtitle-1 {
+    font-size: 0.9rem !important;
+  }
+
+  .text-subtitle-2 {
+    font-size: 0.8rem !important;
+  }
+
+  // Mejorar las acciones de las tarjetas
+  .v-card-actions {
+    padding: 0.5rem !important;
+
+    .v-btn {
+      font-size: 0.8rem;
+      padding: 0.5rem 1.5rem;
+      min-height: 40px;
+    }
+  }
+
+  // Footer responsive
+  .v-footer {
+    font-size: 0.65rem;
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  // Snackbar responsive
+  .v-snackbar {
+    .v-snackbar__wrapper {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// Mantener el diseño original en móvil horizontal
+@media screen and (max-width: 768px) and (orientation: landscape) {
+  .v-row.dense {
+    .v-col {
+      &[cols="6"] {
+        flex: 0 0 50%;
+        max-width: 50%;
+      }
+    }
+  }
+
+  // Mantener diseño horizontal para botones
+  .v-stepper-window-item:nth-child(2) {
+    .v-col:last-child {
+      .d-flex.flex-column.ga-4 {
+        gap: 1rem;
+        max-width: none;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// Media query específica para dispositivos muy pequeños (< 400px de ancho)
+@media screen and (max-width: 400px) and (orientation: portrait) {
+  .v-stepper {
+    padding: 0.125rem;
+  }
+
+  .v-stepper-window {
+    margin: 0.125rem 0.25rem;
+  }
+
+  :deep(.v-stepper-header) {
+    .v-stepper-item {
+      .v-stepper-item__title {
+        font-size: 0.7rem;
+      }
+
+      .v-stepper-item__subtitle {
+        font-size: 0.6rem;
+      }
+    }
+  }
+
+  .v-btn {
+    font-size: 0.75rem;
+    min-height: 32px;
+    padding: 0 0.75rem;
+  }
+
+  .text-subtitle-1 {
+    font-size: 0.85rem !important;
+  }
+
+  .text-subtitle-2 {
+    font-size: 0.75rem !important;
+  }
 }
 </style>
